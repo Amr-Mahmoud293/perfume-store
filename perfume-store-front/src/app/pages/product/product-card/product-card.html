@@ -1,0 +1,18 @@
+<article class="product-card">
+    <a class="product-card-link" [routerLink]="['/product', product().id]">
+        <div class="product-image-container">
+            <img [src]="product().images[0].url" [alt]="product().images[0].alt" class="product-img" loading="lazy" />
+        </div>
+        <div class="product-details">
+            <div class="product-name-price-row">
+                <h2 class="product-card-title">{{ product().name }}</h2>
+                <span class="product-card-price">${{ product().variants[0].price }}</span>
+            </div>
+            <p class="product-card-subtitle">{{ subtitle() }}</p>
+        </div>
+    </a>
+    <button type="button" class="btn-add-cart" (click)="onAddToCart($event)"
+        [attr.aria-label]="'Add ' + product().name + ' to cart'">
+        ADD TO CART +
+    </button>
+</article>
