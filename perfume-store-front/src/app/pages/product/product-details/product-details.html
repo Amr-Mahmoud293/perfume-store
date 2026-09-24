@@ -1,0 +1,193 @@
+@if (product(); as currentProduct) {
+<article class="product-details-container">
+  <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+    <ol class="breadcrumb-list">
+      <li class="breadcrumb-item">
+        <a routerLink="/home" class="breadcrumb-link">Home</a>
+      </li>
+      <li class="breadcrumb-separator" aria-hidden="true">
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 9L5 5L1 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/product" class="breadcrumb-link">Shop</a>
+      </li>
+      <li class="breadcrumb-separator" aria-hidden="true">
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 9L5 5L1 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/product" class="breadcrumb-link">{{ currentProduct.category.name }}</a>
+      </li>
+      <li class="breadcrumb-separator" aria-hidden="true">
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 9L5 5L1 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {{ currentProduct.name }}
+      </li>
+    </ol>
+  </nav>
+
+  <main class="product-main-layout">
+    <section class="gallery-column" aria-label="Fragrance Gallery">
+      <figure class="main-image-container">
+        <img [src]="selectedImage()" [alt]="currentProduct.name + ' formulation bottle'" class="main-image" />
+      </figure>
+
+      @if (galleryImages().length > 1) {
+      <div class="thumbnails-row" role="tablist" aria-label="Fragrance views">
+        @for (img of galleryImages(); track $index) {
+        <button type="button" role="tab" class="thumbnail-btn" [class.active]="selectedImageIndex() === $index"
+          (click)="selectImage($index)" [attr.aria-selected]="selectedImageIndex() === $index"
+          [attr.aria-label]="'Select image angle ' + ($index + 1) + ' of ' + currentProduct.name">
+          <img [src]="img.url" [alt]="img.alt" class="thumbnail-img" />
+        </button>
+        }
+      </div>
+      }
+    </section>
+
+    <section class="specs-column" aria-label="Fragrance Details and Purchasing Options">
+      <header class="spec-header">
+        <div class="tags-row">
+          @if (currentProduct.scentFamily.length) {
+          <span class="spec-badge badge-primary">
+            Scent Family: {{ currentProduct.scentFamily[0] | titlecase }}
+          </span>
+          }
+          @if (currentProduct.occasions.length) {
+          <span class="spec-badge badge-secondary">
+            Occasion: {{ currentProduct.occasions[0] | titlecase }}
+          </span>
+          }
+        </div>
+        <h1 class="product-title">{{ currentProduct.name }}</h1>
+        <div class="price-status-row">
+          <span class="product-price">${{ currentPrice() }}</span>
+          <div class="stock-status" [class.in-stock]="currentProduct.inStock"
+            [class.out-of-stock]="!currentProduct.inStock">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span class="status-label">
+              {{ currentProduct.inStock ? 'Available in Atelier' : 'Temporarily Unavailable' }}
+            </span>
+          </div>
+        </div>
+      </header>
+      <hr class="spec-divider" aria-hidden="true" />
+      @if (currentProduct.variants.length) {
+      <section class="volume-selector" aria-label="Select Volume">
+        <h2 class="volume-label">Select Volume</h2>
+        <div class="sizes-row" role="radiogroup" aria-label="Available volume sizes">
+          @for (variant of currentProduct.variants; track variant.size) {
+          <button type="button" role="radio" class="size-card"
+            [class.selected]="selectedVariant()?.size === variant.size"
+            [attr.aria-checked]="selectedVariant()?.size === variant.size" (click)="selectVariant(variant)">
+            <span class="size-name">{{ variant.size }}</span>
+            <span class="size-price">${{ variant.price }}</span>
+          </button>
+          }
+        </div>
+      </section>
+      }
+      <div class="gift-wrapping-banner">
+        <div class="gift-wrapping-text">
+          <p class="gift-wrapping-title">Complimentary Signature Gift Wrapping</p>
+          <p class="gift-wrapping-desc">
+            Encased in linen paper box with custom wax seal stamp.
+          </p>
+        </div>
+        <button type="button" role="switch" class="switch-toggle" [class.active]="isGiftWrapped()"
+          [attr.aria-checked]="isGiftWrapped()" (click)="toggleGiftWrapping()"
+          aria-label="Toggle complimentary signature gift wrapping">
+          <span class="switch-handle" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div class="purchase-actions-row">
+        <div class="quantity-controller" role="group" aria-label="Quantity selector">
+          <button type="button" class="qty-btn" (click)="decrementQuantity()" [disabled]="quantity() <= 1"
+            aria-label="Decrease quantity">
+            −
+          </button>
+          <span class="qty-display" aria-live="polite" [attr.aria-label]="'Selected quantity: ' + quantity()">
+            {{ quantity() }}
+          </span>
+          <button type="button" class="qty-btn" (click)="incrementQuantity()" aria-label="Increase quantity">
+            +
+          </button>
+        </div>
+        <button type="button" class="btn-add-to-cart-primary" (click)="addToCart()" [disabled]="!currentProduct.inStock"
+          [attr.aria-label]="'Add ' + currentProduct.name + ' to cart for $' + totalPrice()">
+          @if (currentProduct.inStock) {
+          Add to Cart / ${{ totalPrice() }}
+          } @else {
+          Out of Stock
+          }
+        </button>
+      </div>
+      <hr class="spec-divider" aria-hidden="true" />
+      <section class="scent-anatomy-section" aria-labelledby="scent-anatomy-heading">
+        <h2 id="scent-anatomy-heading" class="anatomy-title">Scent Anatomy</h2>
+        <p class="anatomy-desc">{{ currentProduct.description }}</p>
+        <div class="notes-pyramid">
+          @if (currentProduct.notes.top.length) {
+          <div class="notes-layer-row">
+            <span class="layer-name">Top Notes</span>
+            <span class="layer-ingredients">{{ currentProduct.notes.top.join(', ') }}</span>
+          </div>
+          }
+          @if (currentProduct.notes.heart.length) {
+          <div class="notes-layer-row">
+            <span class="layer-name">Heart Notes</span>
+            <span class="layer-ingredients">{{ currentProduct.notes.heart.join(', ') }}</span>
+          </div>
+          }
+          @if (currentProduct.notes.base.length) {
+          <div class="notes-layer-row">
+            <span class="layer-name">Base Notes</span>
+            <span class="layer-ingredients">{{ currentProduct.notes.base.join(', ') }}</span>
+          </div>
+          }
+        </div>
+      </section>
+    </section>
+  </main>
+
+  @if (relatedProducts().length) {
+  <aside class="related-products-section" aria-labelledby="related-heading">
+    <div class="related-container">
+      <header class="related-header">
+        <h2 id="related-heading" class="related-title">Olfactory Companions</h2>
+        <p class="related-eyebrow">FRAGRANCES OF SYNONYMOUS SOPHISTICATION</p>
+      </header>
+
+      <div class="related-grid">
+        @for (companion of relatedProducts(); track companion.id) {
+        <app-product-card [product]="companion" (addToCart)="addToCart()" />
+        }
+      </div>
+    </div>
+  </aside>
+  }
+</article>
+} @else {
+<section class="not-found-wrapper" role="alert" aria-live="assertive">
+  <div class="not-found-box">
+    <span class="not-found-code">404</span>
+    <h1 class="not-found-title">Fragrance Not Found</h1>
+    <p class="not-found-text">
+      The formulation you are searching for is unavailable or does not exist in our atelier collection.
+    </p>
+    <a routerLink="/product" class="btn-return-shop">
+      Explore All Fragrances
+    </a>
+  </div>
+</section>
+}

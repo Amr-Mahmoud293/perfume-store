@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_ScentFamily, MOCK_Occasions } from '../../../../public/data/data';
-import { ScentFamily, Occasion } from '../models/product.model';
+import { ScentFamily, Occasion, Product } from '../models/product.model';
 
 export type ProductSortOption = 'price_asc' | 'price_desc';
 
@@ -63,6 +63,18 @@ export class ProductService {
   getProductById(id: number | string) {
     const product = MOCK_PRODUCTS.find((p) => String(p.id) === String(id));
     return product;
+  }
+
+  getRelatedProducts(currentProduct: Product, limit: number = 4): Product[] {
+    const allProducts = this.getProducts();
+    const others = allProducts.filter((p) => String(p.id) !== String(currentProduct.id));
+    const sameFamily = others.filter((p) =>
+      p.scentFamily.some((sf) => currentProduct.scentFamily.includes(sf))
+    );
+    const remainder = others.filter((p) =>
+      !p.scentFamily.some((sf) => currentProduct.scentFamily.includes(sf))
+    );
+    return [...sameFamily, ...remainder].slice(0, limit);
   }
 
   getCategories() {

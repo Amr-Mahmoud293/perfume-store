@@ -21,6 +21,7 @@ export const MOCK_PRODUCTS: Product[] = [
     inStock: true,
     images: [
       { url: '/images/perfume_fleur.jpg', alt: 'Fleur de Lune Perfume' },
+      { url: '/images/perfume_santal.jpg', alt: 'Santal Parchment Perfume' },
     ],
     variants: [
       { size: '50ml', price: 195 },
